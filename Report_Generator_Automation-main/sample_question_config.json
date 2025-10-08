@@ -1,0 +1,123 @@
+{
+  "ui": {
+    "title": "NO UNUSED HTTP METHODS"
+  },
+  "questions": [
+    {
+      "id": 1,
+      "question": "Run a one-liner curl loop to test all HTTP methods supported by the DUT web server.",
+      "help_text": "Enter the following command in the terminal:\nfor method in GET POST PUT DELETE HEAD OPTIONS TRACE TRACK PATCH CONNECT; do echo -e \"\n====== Testing $method ======\"; curl -k -X $method https://192.168.1.2/ -i; done",
+      "error_message": "Failed to execute the curl one-liner or unable to detect supported HTTP methods.",
+      "question_type": "command_execution",
+      "script_name": "scripts/script_console_usb_status.py",
+      "icon_info": {
+        "show_icon": false,
+        "title": "",
+        "content": ""
+      },
+      "screenshot_line_number": 45,
+      "dir_way": "start",
+      "placeholder": "http_methods_test"
+    },
+    {
+      "id": 2,
+      "question": "Check the interface status by entering the following commands in the terminal: ifconfig",
+      "help_text": "Check the interface status by entering the following commands in the terminal: ifconfig.",
+      "error_message": "Failed to retrieve interface status, or the command is not working.",
+      "question_type": "command_execution",
+      "script_name": "scripts/script_ifconfig.py",
+      "icon_info": {
+        "show_icon": false,
+        "title": "",
+        "content": ""
+      },
+      "screenshot_line_number": 30,
+      "dir_way": "start",
+      "placeholder": "if_config"
+    },
+    {
+      "id": 3,
+      "question": "Check whether the SSH and HTTPS services are enabled in the DUT via FortiAP",
+      "help_text": "Check whether the SSH and HTTPS services are enabled in the DUT via FortiAP.",
+      "error_message": "Failed to execute the command or retrieve the required information.",
+      "question_type": "command_execution",
+      "script_name": "scripts/script_https_ssh.py",
+      "icon_info": {
+        "show_icon": false,
+        "title": "",
+        "content": ""
+      },
+      "screenshot_line_number": 0,
+      "dir_way": "none",
+      "placeholder": "adminitrative_credentials"
+    },
+    {
+      "id": 4,
+      "question": "Add the FortiAP to Burp Suite's Target > Scope and browse the DUT's web interface with Burp capturing traffic.",
+      "help_text": "In Burp Suite, go to Target > Scope and add DUT IP Address. Then, open a browser configured to use Burp as a proxy and navigate through all pages of the DUT web interface to allow Burp to capture traffic.",
+      "error_message": "Failed to execute the command or retrieve the required information.",
+      "question_type": "upload",
+      "script_name": "",
+      "icon_info": {
+        "show_icon": false,
+        "title": "",
+        "content": ""
+      },
+      "screenshot_line_number": 0,
+      "dir_way": "none",
+      "placeholder": ""
+    }
+  ],
+  "metadata": {
+    "total_questions": 4,
+    "description": "Automation questions configuration",
+    "version": "1.0"
+  },
+  "configuration": {
+    "fields": [
+      {
+        "id": 1,
+        "key": "interface",
+        "label": "Interface",
+        "type": "dropdown",
+        "required": true,
+        "description": "Network interface for device communication"
+      },
+      {
+        "id": 2,
+        "key": "fortiap_ip",
+        "label": "FortiAP IP Address",
+        "type": "text",
+        "required": true,
+        "description": "IP address of the FortiAP device"
+      }
+    ]
+  },
+  "dependencies": [
+    {
+      "name": [
+        "geckodriver",
+        "python3-tk"
+      ],
+      "install": "apt"
+    },
+    {
+      "name": [
+        "netifaces",
+        "pillow",
+        "selenium",
+        "paramiko",
+        "pyautogui",
+        "tk"
+      ],
+      "install": "pip"
+    }
+  ],
+  "Summary": {
+    "result_1": "none",
+    "remarks_1": "none",
+    "result_2": "none",
+    "remarks_2": "none"
+  },
+  "automatic_images": []
+}

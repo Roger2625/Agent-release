@@ -1,0 +1,18 @@
+[project]
+name = "repl-nix-workspace"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.11"
+dependencies = [
+    "docx>=0.2.4",
+    "paramiko>=3.5.1",
+    "pillow>=11.3.0",
+    "pyautogui>=0.9.54",
+    "pyqt6>=6.9.1",
+    "pyqt6-webengine>=6.9.1",
+    "pyside6>=6.9.1",
+    "python-docx>=1.2.0",
+    "pywin32>=306; sys_platform == 'win32'",
+    "requests>=2.25.0",
+
+]

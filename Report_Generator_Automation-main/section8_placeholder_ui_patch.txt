@@ -1,0 +1,74 @@
+
+# Section 8 Placeholder UI Integration Patch
+# Add this to security_report_generator.py
+
+# 1. Add import at the top of the file (after other imports)
+from section8_placeholder_ui import Section8PlaceholderUI
+
+# 2. Add this method to the SecurityReportGenerator class
+def add_section8_placeholder_ui(self):
+    """Add Section 8 Placeholder UI to the test plan page"""
+    try:
+        # Create the placeholder UI
+        self.section8_placeholder_ui = Section8PlaceholderUI(self)
+        
+        # Add it to the test plan page layout
+        if hasattr(self, 'test_plan_page_layout'):
+            # Add a separator first
+            separator = QFrame()
+            separator.setFrameShape(QFrame.Shape.HLine)
+            separator.setFrameShadow(QFrame.Shadow.Sunken)
+            self.test_plan_page_layout.addWidget(separator)
+            
+            # Add the placeholder UI
+            self.test_plan_page_layout.addWidget(self.section8_placeholder_ui)
+            
+            print("[OK] Section 8 Placeholder UI added to test plan page")
+            return True
+        else:
+            print("[ERROR] Test plan page layout not found")
+            return False
+            
+    except Exception as e:
+        print(f"[ERROR] Failed to add Section 8 Placeholder UI: {e}")
+        return False
+
+# 3. Add this line in the create_test_plan_page method (at the end, before return)
+# Add the placeholder UI
+self.add_section8_placeholder_ui()
+
+# 4. Add this to the load_configuration method (to load placeholder data)
+def load_section8_placeholder_data(self):
+    """Load Section 8 placeholder data from configuration"""
+    try:
+        if hasattr(self, 'section8_placeholder_ui'):
+            # Load placeholder data from config
+            placeholder_data = self.config.get('section8_placeholders', [])
+            
+            # Update the UI with loaded data
+            self.section8_placeholder_ui.load_placeholder_data(placeholder_data)
+            
+            print("[OK] Section 8 placeholder data loaded successfully")
+            
+    except Exception as e:
+        print(f"[ERROR] Failed to load Section 8 placeholder data: {e}")
+
+# 5. Add this to the save_configuration method (to save placeholder data)
+def save_section8_placeholder_data(self):
+    """Save Section 8 placeholder data to configuration"""
+    try:
+        if hasattr(self, 'section8_placeholder_ui'):
+            # Get placeholder data from UI
+            placeholder_data = self.section8_placeholder_ui.get_placeholder_data()
+            
+            # Save to config
+            self.config['section8_placeholders'] = placeholder_data
+            
+            print("[OK] Section 8 placeholder data saved successfully")
+            
+    except Exception as e:
+        print(f"[ERROR] Failed to save Section 8 placeholder data: {e}")
+
+# 6. Call these methods in the appropriate places:
+# - load_section8_placeholder_data() in load_configuration()
+# - save_section8_placeholder_data() in save_configuration()

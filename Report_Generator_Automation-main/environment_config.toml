@@ -1,0 +1,37 @@
+modules = ["python-3.11"]
+
+[nix]
+channel = "stable-25_05"
+packages = ["freetype", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "mesa", "openjpeg", "scrot", "tcl", "tk", "x11vnc", "xorg.xvfb", "xvfb-run", "zlib"]
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Security GUI App"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Security Report Generator"
+
+[[workflows.workflow]]
+name = "Security GUI App"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "export QT_QPA_PLATFORM=vnc && export DISPLAY=:99 && Xvfb :99 -screen 0 1024x768x24 & sleep 2 && pip install PyQt6 python-docx pillow paramiko && python security_report_generator.py"
+
+[[workflows.workflow]]
+name = "Security Report Generator"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python security_report_tkinter.py"

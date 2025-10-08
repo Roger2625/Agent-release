@@ -1,0 +1,5 @@
+PyQt6==6.6.1
+PyQt6-WebEngine==6.6.0
+requests==2.31.0
+pathlib2==2.3.7
+python-docx==1.1.0

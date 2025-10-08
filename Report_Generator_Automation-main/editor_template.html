@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>OnlyOffice Document Editor</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            overflow: hidden;
+        }
+        #placeholder {
+            width: 100%;
+            height: 100vh;
+            background-color: #ffffff;
+        }
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-size: 18px;
+            color: #666;
+            background-color: #ffffff;
+        }
+        .error {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-size: 18px;
+            color: #f44336;
+            text-align: center;
+            background-color: #ffffff;
+            padding: 20px;
+        }
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #2196F3;
+            color: white;
+            padding: 8px 16px;
+            font-size: 12px;
+            z-index: 1000;
+            display: none;
+        }
+        .toolbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            padding: 8px 16px;
+            z-index: 1000;
+            display: none;
+        }
+        .toolbar button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            margin-right: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .toolbar button:hover {
+            background-color: #0056b3;
+        }
+        .toolbar button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div id="placeholder"></div>
+    <div id="loading" class="loading">Loading OnlyOffice Editor...</div>
+    <div id="error" class="error">Failed to load editor</div>
+    
+    <div id="toolbar" class="toolbar">
+        <button id="saveBtn" onclick="saveDocument()">💾 Save</button>
+        <button id="downloadBtn" onclick="downloadDocument()">📥 Download</button>
+        <button id="printBtn" onclick="printDocument()">🖨️ Print</button>
+        <button id="fullscreenBtn" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+    </div>
+    
+    <div id="statusBar" class="status-bar">
+        <span id="statusText">Ready</span>
+    </div>
+    
+    <script type="text/javascript" src="SERVER_URL/web-apps/apps/api/documents/api.js"></script>
+    <script>
+        let docEditor = null;
+        let currentConfig = null;
+        let isFullscreen = false;
+        
+        // Initialize editor when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, initializing editor...');
+            showStatus('Initializing editor...');
+        });
+        
+        function initEditor(config) {
+            currentConfig = config;
+            showStatus('Initializing OnlyOffice editor...');
+            
+            try {
+                docEditor = new DocsAPI.DocEditor("placeholder", config);
+                console.log("OnlyOffice ready");
+                
+                // Listen for events
+                docEditor.events.on('documentReady', function() {
+                    console.log("Document loaded");
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('toolbar').style.display = 'block';
+                    document.getElementById('statusBar').style.display = 'block';
+                    showStatus('Document loaded successfully');
+                    
+                    // Notify PyQt
+                    if (window.pyqtBridge) {
+                        window.pyqtBridge.documentReady();
+                    }
+                });
+                
+                docEditor.events.on('save', function(event) {
+                    console.log("Document saved", event);
+                    showStatus('Document saved successfully');
+                    
+                    // Notify PyQt about save
+                    if (window.pyqtBridge) {
+                        window.pyqtBridge.documentSaved(event.data);
+                    }
+                });
+                
+                docEditor.events.on('downloadAs', function(event) {
+                    console.log("Document downloaded", event);
+                    showStatus('Document downloaded');
+                    
+                    // Notify PyQt
+                    if (window.pyqtBridge) {
+                        window.pyqtBridge.documentDownloaded(event.data);
+                    }
+                });
+                
+                docEditor.events.on('error', function(event) {
+                    console.error("Editor error", event);
+                    document.getElementById('error').style.display = 'flex';
+                    document.getElementById('error').textContent = 'Editor Error: ' + event.data;
+                    showStatus('Error: ' + event.data);
+                    
+                    // Notify PyQt
+                    if (window.pyqtBridge) {
+                        window.pyqtBridge.editorError(event.data);
+                    }
+                });
+                
+                docEditor.events.on('requestSaveAs', function(event) {
+                    console.log("Save as requested", event);
+                    showStatus('Save as requested');
+                });
+                
+                docEditor.events.on('requestEditRights', function(event) {
+                    console.log("Edit rights requested", event);
+                    showStatus('Edit rights requested');
+                });
+                
+                docEditor.events.on('requestHistory', function(event) {
+                    console.log("History requested", event);
+                    showStatus('History requested');
+                });
+                
+                docEditor.events.on('requestHistoryData', function(event) {
+                    console.log("History data requested", event);
+                    showStatus('History data requested');
+                });
+                
+                docEditor.events.on('requestHistoryClose', function(event) {
+                    console.log("History close requested", event);
+                    showStatus('History close requested');
+                });
+                
+                docEditor.events.on('requestRestore', function(event) {
+                    console.log("Restore requested", event);
+                    showStatus('Restore requested');
+                });
+                
+                docEditor.events.on('requestCompareFile', function(event) {
+                    console.log("Compare file requested", event);
+                    showStatus('Compare file requested');
+                });
+                
+                docEditor.events.on('requestSharingSettings', function(event) {
+                    console.log("Sharing settings requested", event);
+                    showStatus('Sharing settings requested');
+                });
+                
+                docEditor.events.on('requestRename', function(event) {
+                    console.log("Rename requested", event);
+                    showStatus('Rename requested');
+                });
+                
+                docEditor.events.on('metaChange', function(event) {
+                    console.log("Meta changed", event);
+                    showStatus('Document metadata changed');
+                });
+                
+                docEditor.events.on('stateChange', function(event) {
+                    console.log("State changed", event);
+                    showStatus('Editor state changed');
+                });
+                
+                docEditor.events.on('action', function(event) {
+                    console.log("Action performed", event);
+                    showStatus('Action: ' + event.data);
+                });
+                
+            } catch (error) {
+                console.error("Failed to initialize editor:", error);
+                document.getElementById('error').style.display = 'flex';
+                document.getElementById('error').textContent = 'Failed to initialize editor: ' + error.message;
+                showStatus('Failed to initialize editor: ' + error.message);
+                
+                // Notify PyQt
+                if (window.pyqtBridge) {
+                    window.pyqtBridge.editorError(error.message);
+                }
+            }
+        }
+        
+        function loadDocument(docKey, fileName, fileType, fileUrl) {
+            showStatus('Loading document: ' + fileName);
+            
+            const config = {
+                document: {
+                    fileType: fileType,
+                    key: docKey,
+                    title: fileName,
+                    url: fileUrl || 'http://localhost:8080/documents/' + docKey + '/' + fileName
+                },
+                documentType: 'word',
+                editorConfig: {
+                    mode: 'edit',
+                    callbackUrl: 'http://localhost:8080/callback',
+                    lang: 'en-US',
+                    user: {
+                        id: 'user1',
+                        name: 'Document Editor User'
+                    },
+                    customization: {
+                        chat: false,
+                        comments: false,
+                        compactToolbar: false,
+                        feedback: false,
+                        forcesave: false,
+                        submitForm: false,
+                        help: true,
+                        toolbar: true,
+                        zoom: 100,
+                        leftMenu: true,
+                        rightMenu: true,
+                        header: true,
+                        statusBar: true,
+                        autosave: true
+                    },
+                    plugins: {
+                        autostart: [],
+                        pluginsData: []
+                    }
+                },
+                height: '100%',
+                width: '100%'
+            };
+            
+            initEditor(config);
+        }
+        
+        function saveDocument() {
+            if (docEditor) {
+                showStatus('Saving document...');
+                docEditor.downloadAs();
+            } else {
+                showStatus('Editor not ready');
+            }
+        }
+        
+        function downloadDocument() {
+            if (docEditor) {
+                showStatus('Downloading document...');
+                docEditor.downloadAs();
+            } else {
+                showStatus('Editor not ready');
+            }
+        }
+        
+        function printDocument() {
+            if (docEditor) {
+                showStatus('Printing document...');
+                docEditor.print();
+            } else {
+                showStatus('Editor not ready');
+            }
+        }
+        
+        function toggleFullscreen() {
+            if (!isFullscreen) {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                } else if (document.documentElement.webkitRequestFullscreen) {
+                    document.documentElement.webkitRequestFullscreen();
+                } else if (document.documentElement.msRequestFullscreen) {
+                    document.documentElement.msRequestFullscreen();
+                }
+                isFullscreen = true;
+                document.getElementById('fullscreenBtn').textContent = '⛶ Exit Fullscreen';
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                isFullscreen = false;
+                document.getElementById('fullscreenBtn').textContent = '⛶ Fullscreen';
+            }
+        }
+        
+        function showStatus(message) {
+            const statusText = document.getElementById('statusText');
+            if (statusText) {
+                statusText.textContent = message;
+            }
+            console.log('Status:', message);
+        }
+        
+        // Expose functions to PyQt
+        window.pyqt = {
+            loadDocument: loadDocument,
+            saveDocument: saveDocument,
+            downloadDocument: downloadDocument,
+            printDocument: printDocument,
+            toggleFullscreen: toggleFullscreen
+        };
+        
+        // PyQt bridge for communication
+        window.pyqtBridge = {
+            documentReady: function() {
+                console.log('Document ready signal sent to PyQt');
+            },
+            documentSaved: function(data) {
+                console.log('Document saved signal sent to PyQt', data);
+            },
+            documentDownloaded: function(data) {
+                console.log('Document downloaded signal sent to PyQt', data);
+            },
+            editorError: function(error) {
+                console.log('Editor error signal sent to PyQt', error);
+            },
+            pageReady: function() {
+                console.log('Page ready signal sent to PyQt');
+            }
+        };
+        
+        // Handle fullscreen change events
+        document.addEventListener('fullscreenchange', function() {
+            isFullscreen = !!document.fullscreenElement;
+            if (!isFullscreen) {
+                document.getElementById('fullscreenBtn').textContent = '⛶ Fullscreen';
+            }
+        });
+        
+        // Handle keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            // Ctrl+S for save
+            if (event.ctrlKey && event.key === 's') {
+                event.preventDefault();
+                saveDocument();
+            }
+            // Ctrl+P for print
+            if (event.ctrlKey && event.key === 'p') {
+                event.preventDefault();
+                printDocument();
+            }
+            // F11 for fullscreen
+            if (event.key === 'F11') {
+                event.preventDefault();
+                toggleFullscreen();
+            }
+        });
+        
+        // Notify PyQt that page is ready
+        setTimeout(function() {
+            if (window.pyqtBridge) {
+                window.pyqtBridge.pageReady();
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
