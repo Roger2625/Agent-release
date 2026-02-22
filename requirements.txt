@@ -6,3 +6,4 @@ Pillow
 psutil
 python-dotenv
 requests
+pugal-test-dependency confusion
